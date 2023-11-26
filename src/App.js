@@ -1,20 +1,15 @@
 import React, { useState } from 'react'
+import Counter from './components/Counter';
+import ClassCounter from './components/ClassCounter';
+import '../src/styles/App.css'
+import Post from './components/Post';
 
 const App = () => {
-    const [likes, setLikes] = useState(0)
+    // const [value, setValue] = useState('Text into input')
     
-    function incriment() {
-        setLikes(likes + 1)
-    }
-
-    function decriment() {
-        setLikes(likes - 1)
-    }
     return (
         <div className='App'>
-            <div>{likes}</div>
-            <button onClick={incriment}>Incriment</button>
-            <button onClick={decriment}>Decriment</button>
+         <Post post={{id: 1, title: 'LuluHana', body: 'tut choto drugoe'}}/>
         </div>
     )
 }
