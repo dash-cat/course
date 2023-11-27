@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef} from "react";
 import "../src/styles/App.css";
 import PostList from "./components/PostList";
 import MyButton from "./components/UI/button/MyButton";
@@ -14,10 +14,12 @@ const App = () => {
     {id: 6, title: 'LuluHana6', body: 'tut choto drugoe'}
 ])
   const [title, setTitle] = useState('')
+  const bodyInputRef = useRef()
 
   const addNewPost = (e) => {
     e.preventDefault()
     console.log(title)
+    console.log(bodyInputRef.current.value)
 
   }
 
@@ -25,11 +27,14 @@ const App = () => {
     <div className="App">
       <form>
         <MyInput
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        type="text" 
-        placeholder="Название поста" />
-        <MyInput type="text" placeholder="Описание поста" />
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          type="text" 
+          placeholder="Название поста" />
+        <MyInput
+          ref={bodyInputRef}
+          type="text"
+          placeholder="Описание поста" />
         <MyButton
         onClick={addNewPost}
         >Create Post</MyButton>
