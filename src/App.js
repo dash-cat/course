@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "../src/styles/App.css";
 import PostForm from "./components/PostForm";
 import PostList from "./components/PostList";
@@ -18,16 +18,18 @@ const App = () => {
   const [selectedSort, setSelectedSort] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
 
-  function getSortedPosts() {
-    console.log('Work function sort')
+  const sortedPosts = useMemo(() => {
+    console.log('Working')
     if (selectedSort) {
       return [...posts].sort((a,b) => a[selectedSort].localeCompare(b[selectedSort]))
     } else {
       return posts
     }
-  }
+  }, [selectedSort, posts])
 
-  const sortedposts = getSortedPosts()
+  const sortedAndSearchedPosts = useMemo(() => {
+    return sortedPosts.filter(post => post.title.toLocaleLowerCase().includes(searchQuery))
+  }, [searchQuery, sortedPosts])
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
@@ -61,8 +63,8 @@ const App = () => {
           {value: 'body', name: 'By description'},
         ]}
       />
-      {posts.length ? (
-        <PostList remove={deletePost} posts={sortedposts} title="Post for JS" />
+      {sortedAndSearchedPosts.length ? (
+        <PostList remove={deletePost} posts={sortedAndSearchedPosts} title="Post for JS" />
       ) : (
         <h1 style={{ textAlign: "center" }}>Postov NET!</h1>
       )}
