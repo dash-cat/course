@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import "../src/styles/App.css";
 import PostForm from "./components/PostForm";
 import PostList from "./components/PostList";
@@ -9,18 +9,23 @@ import { usePosts } from "./hooks/usePost";
 import PostService from "./components/API/PostService";
 import Loader from "./components/UI/Loader/Loader";
 import { useFetching } from "./hooks/userFetching";
+import { getPageCount } from "./utils/page";
+import { usePagination } from "./hooks/usePagination";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
   const [filter, setFilter] = useState({sort: '', query: ''})
   const [modal, setModal] = useState(false)
-  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPage] = useState(0)
+  const [limit, setLimit] = useState(10)
+  const [page, setPage] = useState(1)
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
+  const pagesArray = usePagination(totalPages)
   const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
-    const response = await PostService.getAll()
+    const response = await PostService.getAll(limit, page)
     setPosts(response.data)
-    console.log(response.headers['x-total-count'])
-    setTotalCount(response.headers['x-total-count'])
+    const totalPages = response.headers['x-total-count']
+    setTotalPage(getPageCount(totalPages, limit))
   })
 
   useEffect(()=> {
@@ -51,6 +56,9 @@ const App = () => {
       ? <div style={{display: "flex", justifyContent: "center", marginTop: '50px'}}><Loader/></div>
       : <PostList remove={deletePost} posts={sortedAndSearchedPosts} title="Post for JS" />
      }
+     {pagesArray && pagesArray.map(p => 
+      <MyButton>{p}</MyButton>
+     )}
       
     </div>
   );
