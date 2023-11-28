@@ -11,55 +11,73 @@ import Loader from "./components/UI/Loader/Loader";
 import { useFetching } from "./hooks/userFetching";
 import { getPageCount } from "./utils/page";
 import { usePagination } from "./hooks/usePagination";
+import Pagination from "./components/UI/pagination/Pagination";
 
 const App = () => {
   const [posts, setPosts] = useState([]);
-  const [filter, setFilter] = useState({sort: '', query: ''})
-  const [modal, setModal] = useState(false)
-  const [totalPages, setTotalPage] = useState(0)
-  const [limit, setLimit] = useState(10)
-  const [page, setPage] = useState(1)
-  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
-  const pagesArray = usePagination(totalPages)
+  const [filter, setFilter] = useState({ sort: "", query: "" });
+  const [modal, setModal] = useState(false);
+  const [totalPages, setTotalPage] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
   const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
-    const response = await PostService.getAll(limit, page)
-    setPosts(response.data)
-    const totalPages = response.headers['x-total-count']
-    setTotalPage(getPageCount(totalPages, limit))
-  })
+    const response = await PostService.getAll(limit, page);
+    setPosts(response.data);
+    const totalPages = response.headers["x-total-count"];
+    setTotalPage(getPageCount(totalPages, limit));
+  });
 
-  useEffect(()=> {
-    fetchPosts()
-  }, [])
+  useEffect(() => {
+    fetchPosts();
+  }, [page]);
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
-    setModal(false)
+    setModal(false);
   };
 
   const deletePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
 
+  function changePage(p) {
+    setPage(p)
+  }
+
   return (
     <div className="App">
-      <MyButton style={{marginTop: '40px'}} onClick={() => setModal(true)}>
+      <MyButton style={{ marginTop: "40px" }} onClick={() => setModal(true)}>
         Create Post
       </MyButton>
       <MyModal visible={modal} setVisible={setModal}>
-        <PostForm create={createPost}/>
+        <PostForm create={createPost} />
       </MyModal>
-      
-      <hr style={{margin: '15px 0px'}}/>
-      <PostFilter filter={filter} setFilter={setFilter}/>
-      {isPostsLoading
-      ? <div style={{display: "flex", justifyContent: "center", marginTop: '50px'}}><Loader/></div>
-      : <PostList remove={deletePost} posts={sortedAndSearchedPosts} title="Post for JS" />
-     }
-     {pagesArray && pagesArray.map(p => 
-      <MyButton>{p}</MyButton>
-     )}
-      
+
+      <hr style={{ margin: "15px 0px" }} />
+      <PostFilter filter={filter} setFilter={setFilter} />
+      {isPostsLoading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "50px",
+          }}
+        >
+          <Loader />
+        </div>
+      ) : (
+        <PostList
+          remove={deletePost}
+          posts={sortedAndSearchedPosts}
+          title="Post for JS"
+        />
+      )}
+      <Pagination
+        page={page} 
+        changePage={changePage} 
+        totalPages={totalPages}
+      />
     </div>
   );
 };
