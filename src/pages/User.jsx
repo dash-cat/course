@@ -1,26 +1,51 @@
-import React from "react";
-import MyButton from "./UI/button/MyButton";
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import {useParams} from 'react-router-dom'
+import PostService from "../components/API/PostService";
+import { useFetching } from "../hooks/userFetching";
+import Loader from "../components/UI/Loader/Loader";
 
-const Post = (props) => {
-    const navigate = useNavigate();
-    console.log(navigate)
+const User = (props) => {
+    const params = useParams()
+    const [post, setPost] = useState({})
+    const [comments, setComments] = useState([])
+    const [fetchPosts, isPostsLoading, error] = useFetching(async() => {
+        const responce = await PostService.getPostById(params.id)
+        setPost(responce.data)
+    })
+
+    const [fetchComment, isCommentloading, commentError] = useFetching(async() => {
+        const responce = await PostService.getCommentsById(params.id)
+        setComments(responce.data)
+    })
+
+    useEffect(()=>{
+        fetchPosts(params.id)
+        fetchComment(params.id)
+    }, [])
     return (
-        <div className='post'>
-        <div className='post__content'>
-            <strong>{props.post.id}. {props.post.title}</strong>
-            <div>
-               {props.post.body}
-            </div>
+        <div>
+            <h1>Вы открыли страницу поста {params.id}</h1>
+            {
+            isPostsLoading
+            ? <Loader/> 
+            : <div> {post.id}{post.title}{post.body}</div>
+            }
+            <h1>
+                Комментарии
+            </h1>
+            {
+                isCommentloading
+                ? <Loader/>
+                : <div>
+                    {comments.map(comm =>
+                        <div style={{marginTop: '15px'}}>
+                           <h5>{comm.email}</h5> 
+                           <div>{comm.body}</div>
+                        </div>
+                        )}
+                </div>
+            }
         </div>
-        <div className='post__btns'> 
-            <MyButton onClick={() => navigate.push(`/post/${props.post.id}`)}>Open</MyButton>
-        </div>
-        <div className='post__btns'> 
-            <MyButton onClick={() => props.remove(props.post)}>Delete</MyButton>
-        </div>
-
-      </div>
     )
 }
-export default Post;
+export default User;
